@@ -1,27 +1,89 @@
-# KmeansClustering-Time-SeriesAnalysis
-Kmeans analysis report with a time-series forecasting MLP NN
+# Wine Quality Analysis Project
 
+## Overview
 
-# Overview
-This coursework is part of the Machine Learning & Data Mining module at the University of Westminster, designed for the academic year 2023-2024. The coursework is divided into two main parts: Partitioning Clustering and Financial Forecasting, each focusing on different aspects of machine learning and data analysis using R programming.
-# Part 1: Partitioning Clustering
-# Objective
-The first part of the coursework involves clustering analysis using a dataset of white wine samples. The dataset includes various physicochemical properties of the wine, such as acidity, sugar content, and alcohol level. The primary goal is to cluster these wines based on their chemical properties, excluding the quality rating provided by human tasters.
-# Methodology
-Data Preprocessing: Includes scaling and outlier detection/removal to prepare the dataset for clustering.
-Determining Number of Clusters: Utilizes methods like the Elbow method, Silhouette method, and Gap statistic to determine the optimal number of clusters.
-K-Means Clustering: Implementation of k-means clustering to group the wines into clusters based on their properties.
-Evaluation: The clusters are evaluated using metrics like the silhouette score and the Calinski-Harabasz index.
-# Code Implementation
-The R code provided performs all the steps from data preprocessing to clustering and evaluation. It includes functions for reading the data, preprocessing, applying k-means, and calculating evaluation metrics.
-# Part 2: Financial Forecasting
-# Objective
-The second part focuses on forecasting the exchange rate between the USD and the Euro using a multilayer perceptron neural network (MLP-NN). The dataset contains daily exchange rates over a specified period.
-# Methodology
-Data Preparation: Involves normalizing the data and creating input/output matrices for the neural network.
-MLP Neural Network: A neural network is trained to predict future exchange rates based on historical data.
-Evaluation: The model's performance is assessed using statistical metrics like RMSE (Root Mean Squared Error) and MAE (Mean Absolute Error).
-# Code Implementation
-The provided R code includes detailed steps for preparing the data, training the MLP model, and evaluating its performance. It uses the neuralnet package in R for modeling.
-# Reports and Analysis
-Each part of the coursework includes a detailed report that discusses the methodologies used, the results obtained, and the implications of these results. The reports also include visualizations such as plots of clustered data and performance metrics of the forecasting model.
+This project focuses on clustering white wine samples using unsupervised learning techniques in R. The dataset contains 2,700 white wine samples from Portugal, with 11 physicochemical attributes. The primary goal is to group similar wines based on these attributes without using quality ratings. The analysis involves clustering in both the full attribute space and a reduced PCA space to understand the effect of dimensionality reduction on clustering results.
+
+---
+
+## Features
+
+- **Clustering Techniques**: K-means clustering is applied to identify groups of similar wines.
+- **Dimensionality Reduction**: Principal Component Analysis (PCA) is used to reduce the dataset's dimensions while retaining at least 85% of the variance.
+- **Evaluation Metrics**: Silhouette scores, Calinski-Harabasz index, and BSS/TSS ratios are used to evaluate cluster quality.
+
+---
+
+## Installation
+
+1. Install R and RStudio.
+2. Install the required R libraries:
+   ```R
+   install.packages(c("NbClust", "cluster", "factoextra", "tidyverse", "readxl", "ggplot2", "dplyr", "fpc"))
+   ```
+
+---
+
+## Usage
+
+### 1. Data Preprocessing
+- Load the dataset:
+  ```R
+  library(readxl)
+  wine_data <- read_excel("Data/Whitewine_v6.xlsx")
+  ```
+- Randomize and remove outliers using Z-scores:
+  ```R
+  z_scores <- as.data.frame(scale(wine_data))
+  no_outliers <- z_scores[!rowSums(abs(z_scores) > 3.8), ]
+  ```
+
+### 2. Determine Optimal Clusters
+- Use methods like Elbow Curve, Silhouette, and Gap Statistics:
+  ```R
+  library(factoextra)
+  fviz_nbclust(no_outliers, kmeans, method = 'wss')
+  ```
+
+### 3. Perform K-means Clustering
+- Apply K-means with $$k=2$$:
+  ```R
+  kc <- kmeans(no_outliers[, -length(no_outliers)], centers = 2)
+  ```
+
+### 4. PCA and Clustering
+- Reduce dimensions using PCA:
+  ```R
+  pca_wine <- prcomp(no_outliers[, -length(no_outliers)], center = TRUE)
+  ```
+- Perform clustering on transformed data:
+  ```R
+  kmeans_pca <- kmeans(as.data.frame(-pca_wine$x[,1:7]), centers = 2)
+  ```
+
+---
+
+## Results
+
+| Method          | BSS/TSS Ratio | Avg. Silhouette Width | CH Index |
+|------------------|---------------|------------------------|----------|
+| Full Dataset     | 0.239         | 0.21                  | 820      |
+| PCA Transformed  | 0.267         | 0.25                  | 949      |
+
+- PCA improved cluster separation slightly but clusters remain moderately defined.
+
+---
+
+## Conclusion
+
+This analysis demonstrated that clustering white wine samples based on physicochemical properties can reveal patterns in the data. While PCA improved cluster definition marginally, further refinement or alternative clustering methods may be needed for better separation.
+
+---
+
+## Appendix: Full R Code
+
+The full R code used for this project is available in the attached documentation or can be accessed in the `scripts/` folder of this repository.
+
+Citations:
+[1] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/13497718/015965df-622c-477f-8cf0-257e711dd860/Wine-Quality-Analysis-Report.pdf
+[2] https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/13497718/a58b1bea-0f14-4724-86f5-bfe133ef96e1/Time-Series-Forecasting-Report.docx
